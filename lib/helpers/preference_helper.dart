@@ -1,17 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PreferencesHelper {
-  final String _kLanguagePrefs = 'Tc';
+class PreferencesHelper extends ChangeNotifier {
+  static const _kLanguagePrefs = 'Tc';
+  final SharedPreferences _pref;
 
-  Future<String> getLangPrefs() async {
-    final SharedPreferences sharedPreference =
-        await SharedPreferences.getInstance();
-    return sharedPreference.getString(_kLanguagePrefs) ?? 'Tc';
-  }
+  PreferencesHelper(this._pref);
 
-  Future<bool> setLangPrefs(String value) async {
-    final SharedPreferences sharedPreference =
-        await SharedPreferences.getInstance();
-    return sharedPreference.setString(_kLanguagePrefs, value);
+  String get getLangPrefs => _pref?.getString(_kLanguagePrefs) ?? 'Tc';
+
+  void setLangPrefs(String value) {
+    _pref?.setString(_kLanguagePrefs, value);
+    notifyListeners();
   }
 }

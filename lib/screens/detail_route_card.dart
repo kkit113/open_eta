@@ -6,6 +6,7 @@ import 'package:open_eta/models/current_detail.dart';
 import 'package:open_eta/screens/stop_detail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class DetailRouteCard extends StatefulWidget {
   final CurrentDetail currentDetail;
@@ -29,17 +30,9 @@ class _DetailRouteCardState extends State<DetailRouteCard> {
   bool markedStop = false;
   AlwaysStoppedAnimation<Color> progressColor;
   bool markedBus = false;
-  PreferencesHelper prefsHelper = PreferencesHelper();
 
-  String _langValue = 'Tc';
+  String _langValue;
   List<String> circularRoutes;
-
-  void getLangPrefs() async {
-    String l = await prefsHelper.getLangPrefs() ?? 'Tc';
-    setState(() {
-      _langValue = l;
-    });
-  }
 
   void getCircularRoute() async {
     circularRoutes = await busDataHelper.getCircularRoute();
@@ -62,7 +55,6 @@ class _DetailRouteCardState extends State<DetailRouteCard> {
         });
       }
     });
-    getLangPrefs();
     super.initState();
   }
 
@@ -73,23 +65,13 @@ class _DetailRouteCardState extends State<DetailRouteCard> {
     fontSize = uiHelper.stdFont(context);
     stdPadding = uiHelper.stdPadding(context);
     progressColor = uiHelper.progressColor;
-
-    ///TODO database to keep circular routes
-//    circularRoutes = ['11', '37A', '37B', '37x'];
+    final settings = Provider.of<PreferencesHelper>(context);
+    _langValue = settings.getLangPrefs;
 
     return body();
   }
 
   body() {
-//    print('RouteDetailBody: $initDir vs   ${currentDetail.dir}');
-//    String des = initDir == 'I'
-//        ? _langValue == 'Sc'
-//            ? currentDetail.origSc
-//            : _langValue == 'En' ? currentDetail.origEn : currentDetail.origTc
-//        : _langValue == 'Sc'
-//            ? currentDetail.destSc
-//            : _langValue == 'En' ? currentDetail.destEn : currentDetail.destTc;
-//    print('Route detail: ${currentDetail.dir}');
     return Container(
         margin: EdgeInsets.symmetric(horizontal: stdPadding * 3),
         child: Column(
@@ -177,67 +159,6 @@ class _DetailRouteCardState extends State<DetailRouteCard> {
                         scrollDirection: Axis.horizontal,
                         itemCount: snapshot.data.data.length,
                         itemBuilder: (context, index) {
-//                          String defaultDest =
-//                              snapshot.data.data[index].dir == 'O'
-//                                  ? _langValue == 'Sc'
-//                                      ? '${currentDetail.destSc}'
-//                                      : _langValue == 'En'
-//                                          ? '${currentDetail.destEn}'
-//                                          : '${currentDetail.destTc}'
-//                                  : _langValue == 'Sc'
-//                                      ? '${currentDetail.origSc}'
-//                                      : _langValue == 'En'
-//                                          ? '${currentDetail.origEn}'
-//                                          : '${currentDetail.origTc}';
-//
-//                          String etaDest = _langValue == 'Sc'
-//                              ? '${snapshot.data.data[index].destSc}'
-//                              : _langValue == 'En'
-//                                  ? '${snapshot.data.data[index].destEn}'
-//                                  : '${snapshot.data.data[index].destTc}';
-//
-//                          if (snapshot.data.data[index].seq == 1)
-//                            print(
-//                                'route vs sch (${snapshot.data.data[index].route}) ${snapshot.data.data[index].seq}: ${defaultDest.split(' ').join('')} vs ${etaDest.replaceAll(RegExp(r'\s\b|\b\s'), '')}');
-//
-//                          if (!defaultDest.split(' ').join('').contains(etaDest
-//                                  .split(' ')
-//                                  .join('')
-//                                  .substring(0, 2)) &&
-//                              !circularRoutes
-//                                  .contains(snapshot.data.data[index].route)) {
-//                            print(
-//                                'detail_card: ${snapshot.data.data[index].route} ${snapshot.data.data[index].seq} - ${defaultDest.split(' ').join('')} vs ${etaDest.split(' ').join('')}'
-//                                '${defaultDest.split(' ').join('').contains(etaDest.split(' ').join(''))}');
-//                            return Container(
-//                              width: scrWidth * 0.3,
-//                              child: Column(
-//                                children: <Widget>[
-//                                  if (snapshot.data.data[index].eta.length > 0)
-//                                    Text(_langValue == 'Sc'
-//                                        ? '${snapshot.data.data[index].eta.split('T').last.split('+').first.substring(0, 5)}'
-//                                        : _langValue == 'En'
-//                                            ? '${snapshot.data.data[index].eta.split('T').last.split('+').first.substring(0, 5)}'
-//                                            : '${snapshot.data.data[index].eta.split('T').last.split('+').first.substring(0, 5)}'),
-//                                  Text(_langValue == 'Sc'
-//                                      ? '${snapshot.data.data[index].destEn} '
-//                                      : _langValue == 'En'
-//                                          ? '${snapshot.data.data[index].destEn}'
-//                                          : '${snapshot.data.data[index].destTc}'),
-//                                  if (snapshot.data.data[index].eta.length == 0)
-//                                    Text(
-//                                      _langValue == 'Sc'
-//                                          ? '${snapshot.data.data[index].rmkSc}'
-//                                          : _langValue == 'En'
-//                                              ? '${snapshot.data.data[index].rmkEn}'
-//                                              : '${snapshot.data.data[index].rmkTc}',
-//                                      style: TextStyle(
-//                                          color: Colors.deepOrange[400]),
-//                                    ),
-//                                ],
-//                              ),
-//                            );
-//                          }
                           if (snapshot.data.data[index].eta.length > 0) {
                             int d;
                             try {
@@ -268,21 +189,8 @@ class _DetailRouteCardState extends State<DetailRouteCard> {
                                         textAlign: TextAlign.left,
                                         style: uiHelper.timeString(d, 20),
                                       ),
-//                                      Text(
-//                                        ' (${snapshot.data.data[index].etaSeq})',
-//                                        textAlign: TextAlign.center,
-//                                        style:
-//                                            TextStyle(fontSize: fontSize * 0.6),
-//                                      ),
                                     ],
                                   ),
-//                                      Text(
-//                                        '${snapshot.data.data[index].destTc}',
-//                                        textAlign: TextAlign.center,
-//                                        style:
-//                                            TextStyle(fontSize: fontSize * 0.7),
-//                                        overflow: TextOverflow.ellipsis,
-//                                      ),
                                 ],
                               ),
                             );
@@ -303,11 +211,6 @@ class _DetailRouteCardState extends State<DetailRouteCard> {
                                           fontSize: fontSize * 0.8,
                                           color: Colors.deepOrange[400]),
                                     ),
-//                                  Text(
-//                                    '${snapshot.data.data[index].destTc}',
-//                                    textAlign: TextAlign.center,
-//                                    style: TextStyle(fontSize: fontSize * 0.7),
-//                                  ),
                                   ]),
                             );
                           }

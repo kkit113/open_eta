@@ -5,6 +5,7 @@ import 'package:open_eta/models/route.dart';
 import 'package:open_eta/screens/stop_list.dart';
 import 'package:flutter/material.dart';
 import 'package:open_eta/helpers/database_helper.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class RouteList extends StatefulWidget {
@@ -17,7 +18,6 @@ class _RouteListState extends State<RouteList> {
   UiHelper uiHelper = UiHelper();
   TextEditingController routeInputController = TextEditingController();
   NavigationHelper navigationHelper = NavigationHelper();
-  PreferencesHelper prefsHelper = PreferencesHelper();
   List<BusRouteData> busRouteDataList;
   List<String> routePrefix;
   BusRouteData selectedBusRouteData;
@@ -26,14 +26,13 @@ class _RouteListState extends State<RouteList> {
   int prefixCount = 0;
   AlwaysStoppedAnimation<Color> progressColor;
   String selectedPrefix;
-  String langPrefs = 'Tc';
+  String _langValue;
 
   @override
   void initState() {
     updateListView();
     dynamicUpdateListView('*');
     prefixList();
-    getLangPrefs();
     super.initState();
   }
 
@@ -86,43 +85,11 @@ class _RouteListState extends State<RouteList> {
     return routePrefix as Future;
   }
 
-  void getLangPrefs() async {
-    String l = await prefsHelper.getLangPrefs();
-    setState(() {
-      langPrefs = l;
-    });
-  }
-
-//  void loopBusRoute(String co) async {
-//    int tableCount = await databaseHelper.getTableCount();
-//    print('tableCount before Insert $tableCount');
-//    BusRoute busRoute = await _getBusRouteJson(co: co);
-//    int count = busRoute.data.length;
-//    int result;
-//    for (int i = 0; i < count; i++) {
-//      BusRouteData busRouteData = busRoute.data[i];
-//      print('Insert data $busRouteData');
-//      result = await databaseHelper.insertBusRoute(busRouteData);
-//      print('Insert data result: $result');
-//    }
-//  }
-
   void navigateToStopList() async {
     await Navigator.push(context, MaterialPageRoute(builder: (context) {
       return BusStopList();
     }));
   }
-
-//  Future<BusRoute> _getBusRouteJson({String co}) async {
-//    Response re = await HttpHelper().fetchRouteListData(co);
-//    if (re.statusCode == 200) {
-//      final jsonResponse = json.decode(re.body);
-//      print('$co - BusRoute: $jsonResponse');
-//      return BusRoute.fromJson(jsonResponse);
-//    } else {
-//      throw Exception('Fail to load from Internet![${re.statusCode}]');
-//    }
-//  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,13 +102,15 @@ class _RouteListState extends State<RouteList> {
       busRouteDataList = List<BusRouteData>();
       updateListView();
     }
+    final settings = Provider.of<PreferencesHelper>(context);
+    _langValue = settings.getLangPrefs;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          langPrefs == 'Sc'
+          _langValue == 'Sc'
               ? '路线'
-              : langPrefs == 'En'
+              : _langValue == 'En'
                   ? 'Routes'
                   : '路線'
                       '  ($count)',
@@ -205,9 +174,9 @@ class _RouteListState extends State<RouteList> {
                     }
                   },
                   child: Text(
-                    langPrefs == 'En'
+                    _langValue == 'En'
                         ? 'Clear'
-                        : langPrefs == 'Sc' ? '清除' : '清除',
+                        : _langValue == 'Sc' ? '清除' : '清除',
                     style: uiHelper.size(20),
                   ),
                 )
@@ -218,27 +187,6 @@ class _RouteListState extends State<RouteList> {
       ),
     );
   }
-//  void deleteAllTable() async {
-//    final Future<Database> dbFuture = databaseHelper.initializeDatabase();
-//    dbFuture.then((database) {
-//      databaseHelper.deleteRouteStopTable();
-//      databaseHelper.deleteBusStopTable();
-//      databaseHelper.deleteBusRouteTable();
-//    });
-//    int s = await databaseHelper.getBusStopDataCount();
-//    print('BusStopCount $s');
-//    int c = await databaseHelper.getRouteStopDataCount();
-//    print('RouteStopCount $c');
-//    int r = await databaseHelper.getBusRouteCount();
-//    print('BusRouteCount $r');
-//  }
-
-//  void deleteTables() async {
-//    int result = await databaseHelper.deleteBusRouteTable();
-//    print('Detele Table executed');
-//    int tableCount = await databaseHelper.getTableCount();
-//    print('deleteBusRouteTable: $result($tableCount)');
-//  }
 
   Widget getBusRouteListView() {
     if (busRouteDataList == null)
@@ -286,9 +234,9 @@ class _RouteListState extends State<RouteList> {
                   child: Container(
                     width: scrWidth * .36,
                     child: Text(
-                      langPrefs == 'En'
+                      _langValue == 'En'
                           ? '${this.busRouteDataList[position].origEn}'
-                          : langPrefs == 'Sc'
+                          : _langValue == 'Sc'
                               ? '${this.busRouteDataList[position].origSc}'
                               : '${this.busRouteDataList[position].origTc}',
                       style: uiHelper.size(24),
@@ -308,9 +256,9 @@ class _RouteListState extends State<RouteList> {
                   child: Container(
                     width: scrWidth * .36,
                     child: Text(
-                      langPrefs == 'En'
+                      _langValue == 'En'
                           ? '${this.busRouteDataList[position].destEn}'
-                          : langPrefs == 'Sc'
+                          : _langValue == 'Sc'
                               ? '${this.busRouteDataList[position].destSc}'
                               : '${this.busRouteDataList[position].destTc}', //towards destTc = outbound
                       style: uiHelper.size(24),

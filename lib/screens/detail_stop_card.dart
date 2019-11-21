@@ -7,6 +7,7 @@ import 'package:open_eta/models/route.dart';
 import 'package:open_eta/screens/route_detail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class DetailStopCard extends StatefulWidget {
   final CurrentDetail currentDetail;
@@ -28,15 +29,7 @@ class _DetailStopCardState extends State<DetailStopCard> {
   bool markedStop = false;
   AlwaysStoppedAnimation<Color> progressColor;
   bool markedBus = false;
-  PreferencesHelper prefsHelper = PreferencesHelper();
-  String _langValue = 'Tc';
-
-  void getLangPrefs() async {
-    String l = await prefsHelper.getLangPrefs() ?? 'Tc';
-    setState(() {
-      _langValue = l;
-    });
-  }
+  String _langValue;
 
   @override
   void initState() {
@@ -54,7 +47,6 @@ class _DetailStopCardState extends State<DetailStopCard> {
         });
       }
     });
-    getLangPrefs();
     super.initState();
   }
 
@@ -65,14 +57,13 @@ class _DetailStopCardState extends State<DetailStopCard> {
     fontSize = uiHelper.stdFont(context);
     stdPadding = uiHelper.stdPadding(context);
     progressColor = uiHelper.progressColor;
+    final settings = Provider.of<PreferencesHelper>(context);
+    _langValue = settings.getLangPrefs;
 
     return body();
   }
 
   body() {
-    String des =
-        currentDetail.dir == 'I' ? currentDetail.origTc : currentDetail.destTc;
-
     return Container(
         margin: EdgeInsets.symmetric(horizontal: stdPadding * 3),
         child: Column(
@@ -167,17 +158,6 @@ class _DetailStopCardState extends State<DetailStopCard> {
                         scrollDirection: Axis.horizontal,
                         itemCount: snapshot.data.data.length,
                         itemBuilder: (context, index) {
-//                              if (snapshot.data.data[index].destTc
-//                                      .toString()
-//                                      .substring(0, 2)
-//                                      .trim() !=
-//                                  des.toString().substring(0, 2).trim()) {
-//                                return Container(
-//                                  width: scrWidth * 0.3,
-//                                  child: Text(
-//                                      '${snapshot.data.data[index].eta.length > 0 ? snapshot.data.data[index].eta.split('T').last.split('+').first.substring(0, 5) : snapshot.data.data[index].rmkTc} ${snapshot.data.data[index].destTc}'),
-//                                );
-//                              }
                           if (snapshot.data.data[index].eta.length > 0) {
                             int d;
                             try {
@@ -193,8 +173,6 @@ class _DetailStopCardState extends State<DetailStopCard> {
                             return Container(
                               width: scrWidth * 0.3,
                               child: Column(
-//                                  crossAxisAlignment:
-//                                      CrossAxisAlignment.stretch,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   Row(
@@ -211,60 +189,11 @@ class _DetailStopCardState extends State<DetailStopCard> {
                                         textAlign: TextAlign.left,
                                         style: uiHelper.timeString(d, 20),
                                       ),
-//                                          Text(
-//                                            ' (${snapshot.data.data[index].etaSeq})',
-//                                            textAlign: TextAlign.center,
-//                                            style: TextStyle(
-//                                                fontSize: fontSize * 0.6),
-//                                          ),
                                     ],
                                   ),
-//                                      Text(
-//                                        '${snapshot.data.data[index].destTc}',
-//                                        textAlign: TextAlign.center,
-//                                        style:
-//                                            TextStyle(fontSize: fontSize * 0.7),
-//                                        overflow: TextOverflow.ellipsis,
-//                                      ),
                                 ],
                               ),
                             );
-
-//                                Column(
-//                                  children: <Widget>[
-//                                    Row(
-//                                      mainAxisAlignment:
-//                                          MainAxisAlignment.center,
-//                                      crossAxisAlignment:
-//                                          CrossAxisAlignment.end,
-//                                      children: <Widget>[
-//                                        Text(
-//                                          '${snapshot.data.data[index].eta.split('T').last.split('+').first.substring(0, 5)}',
-//                                          textAlign: TextAlign.right,
-//                                          style: TextStyle(fontSize: fontSize),
-//                                        ),
-//                                        Text(
-//                                          ':${snapshot.data.data[index].eta.split('T').last.split('+').first.split(':').last}',
-//                                          textAlign: TextAlign.left,
-//                                          style: TextStyle(
-//                                              fontSize: fontSize * 0.8),
-//                                        ),
-//                                        Text(
-//                                          ' (${snapshot.data.data[index].etaSeq})',
-//                                          textAlign: TextAlign.center,
-//                                          style: TextStyle(
-//                                              fontSize: fontSize * 0.6),
-//                                        ),
-//                                      ],
-//                                    ),
-//                                    Text(
-//                                      '${snapshot.data.data[index].destTc}',
-//                                      textAlign: TextAlign.center,
-//                                      style:
-//                                          TextStyle(fontSize: fontSize * 0.7),
-//                                    ),
-//                                  ],
-//                                );
                           } else {
                             return Container(
                               width: scrWidth * 0.3,
@@ -282,11 +211,6 @@ class _DetailStopCardState extends State<DetailStopCard> {
                                           fontSize: fontSize * 0.8,
                                           color: Colors.deepOrange[400]),
                                     ),
-//                                  Text(
-//                                    '${snapshot.data.data[index].destTc}',
-//                                    textAlign: TextAlign.center,
-//                                    style: TextStyle(fontSize: fontSize * 0.7),
-//                                  ),
                                   ]),
                             );
                           }

@@ -107,7 +107,10 @@ class DatabaseHelper {
     var busRouteMapList = await dynamicBusRouteMapList(input);
     int count = busRouteMapList.length;
     List<BusRouteData> busRouteList = List<BusRouteData>();
+//    List<String> emptyR = await emptyRoute();
     for (int i = 0; i < count; i++) {
+//      if (!emptyR
+//          .contains(BusRouteData.fromMapObject(busRouteMapList[i]).route))
       busRouteList.add(BusRouteData.fromMapObject(busRouteMapList[i]));
     }
     return busRouteList;
@@ -130,6 +133,20 @@ class DatabaseHelper {
       circularRouteList.add(BusRouteData.fromMapObject(result[i]).route);
     }
     return circularRouteList;
+  }
+
+  Future<List<String>> emptyRoute() async {
+    Database db = await this.database;
+    var result = await db.rawQuery('SELECT * from BusRoute'
+        ' where BusRoute.route not in ('
+        ' SELECT DISTINCT route from RouteStop)');
+    int count = result.length;
+    List<String> routeList = List<String>();
+    for (int i = 0; i < count; i++) {
+      routeList.add(BusRouteData.fromMapObject(result[i]).route);
+    }
+    print('emptyRoute: ${routeList.length}');
+    return routeList;
   }
 
   Future<int> insertBusRoute(BusRouteData busRouteData) async {

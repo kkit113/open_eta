@@ -6,16 +6,14 @@ import 'package:open_eta/helpers/ui_helper.dart';
 import 'package:open_eta/models/current_detail.dart';
 import 'package:open_eta/models/prefer_eta.dart';
 import 'package:open_eta/models/route.dart';
-import 'package:open_eta/screens/route_detail.dart';
-import 'package:open_eta/screens/stop_detail.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class EtaCard extends StatefulWidget {
   final PreferEta preferEta;
-  final String langPrefs;
-  EtaCard(this.preferEta, this.langPrefs);
+  EtaCard(this.preferEta);
   @override
-  _EtaCardState createState() => _EtaCardState(this.preferEta, this.langPrefs);
+  _EtaCardState createState() => _EtaCardState(this.preferEta);
 }
 
 class _EtaCardState extends State<EtaCard> {
@@ -25,20 +23,11 @@ class _EtaCardState extends State<EtaCard> {
   BusDataHelper busDataHelper = BusDataHelper();
   UiHelper uiHelper = UiHelper();
   NavigationHelper navigationHelper = NavigationHelper();
-  PreferencesHelper prefsHelper = PreferencesHelper();
-  String langPrefs;
+  String _langValue;
 
-  _EtaCardState(this.preferEta, this.langPrefs);
+  _EtaCardState(this.preferEta);
   CurrentDetail currentDetail;
   AlwaysStoppedAnimation<Color> progressColor;
-
-//  void getLangPrefs() async {
-//    String l = await prefsHelper.getLangPrefs() ?? 'Tc';
-//    setState(() {
-//      _langValue = l;
-//    });
-//    print('eta_card langPrefs: $l');
-//  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +38,8 @@ class _EtaCardState extends State<EtaCard> {
     progressColor = uiHelper.progressColor;
     cardWidth = scrHeight * 0.5;
     cardHeight = scrHeight * 0.75 * 0.5;
-
-//    getLangPrefs();
+    final settings = Provider.of<PreferencesHelper>(context);
+    _langValue = settings.getLangPrefs;
 
     return Container(
       width: cardWidth,
@@ -92,14 +81,12 @@ class _EtaCardState extends State<EtaCard> {
                 ),
               ),
               Container(
-//                      key: nameKey,
                 decoration: BoxDecoration(
                   color: Colors.yellow[200],
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
                 margin: EdgeInsets.symmetric(
                     vertical: stdPadding, horizontal: stdPadding),
-//                      width: scrWidth * 0.3,
                 child: GestureDetector(
                   onTap: () {
                     currentDetail = CurrentDetail(
@@ -122,12 +109,12 @@ class _EtaCardState extends State<EtaCard> {
                     navigationHelper.navigateToStop(context, currentDetail);
                   },
                   child: Text(
-                    langPrefs == 'Sc'
+                    _langValue == 'Sc'
                         ? '${preferEta.nameSc}'
-                        : langPrefs == 'En'
+                        : _langValue == 'En'
                             ? '${preferEta.nameEn}'
                             : '${preferEta.nameTc}',
-                    style: langPrefs == 'En'
+                    style: _langValue == 'En'
                         ? uiHelper.size(20)
                         : uiHelper.size(26),
                     overflow: TextOverflow.ellipsis,
@@ -137,7 +124,6 @@ class _EtaCardState extends State<EtaCard> {
             ],
           ),
           Divider(
-//            key: dividerKey,
             color: Colors.deepPurple,
             endIndent: scrWidth * .03,
             indent: scrWidth * .03,
@@ -197,17 +183,12 @@ class _EtaCardState extends State<EtaCard> {
                                     textAlign: TextAlign.left,
                                     style: uiHelper.timeString(d, 20),
                                   ),
-//                                  Text(
-//                                    ' (${snapshot.data.data[index].etaSeq})',
-//                                    textAlign: TextAlign.center,
-//                                    style: uiHelper.timeString(d, 16),
-//                                  ),
                                 ],
                               ),
                               Text(
-                                langPrefs == 'Sc'
+                                _langValue == 'Sc'
                                     ? '${snapshot.data.data[index].destSc}'
-                                    : langPrefs == 'En'
+                                    : _langValue == 'En'
                                         ? '${snapshot.data.data[index].destEn}'
                                         : '${snapshot.data.data[index].destTc}',
                                 textAlign: TextAlign.center,
@@ -219,9 +200,9 @@ class _EtaCardState extends State<EtaCard> {
                         } else {
                           return Column(children: <Widget>[
                             Text(
-                              langPrefs == 'Sc'
+                              _langValue == 'Sc'
                                   ? '${snapshot.data.data[index].rmkSc}'
-                                  : langPrefs == 'En'
+                                  : _langValue == 'En'
                                       ? '${snapshot.data.data[index].rmkEn}'
                                       : '${snapshot.data.data[index].rmkTc}',
                               textAlign: TextAlign.center,
@@ -231,9 +212,9 @@ class _EtaCardState extends State<EtaCard> {
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              langPrefs == 'Sc'
+                              _langValue == 'Sc'
                                   ? '${snapshot.data.data[index].destSc}'
-                                  : langPrefs == 'En'
+                                  : _langValue == 'En'
                                       ? '${snapshot.data.data[index].destEn}'
                                       : '${snapshot.data.data[index].destTc}',
                               textAlign: TextAlign.center,

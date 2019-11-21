@@ -5,6 +5,7 @@ import 'package:open_eta/models/current_detail.dart';
 import 'package:open_eta/models/route.dart';
 import 'package:open_eta/screens/detail_route_card.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class RouteDetail extends StatefulWidget {
   final BusRouteData busRouteData;
@@ -19,12 +20,11 @@ class RouteDetail extends StatefulWidget {
 class _RouteDetailState extends State<RouteDetail> {
   BusRouteData busRouteData;
   String direction, des, initDir, dest;
-  String langPrefs = 'Tc';
+  String _langValue;
   _RouteDetailState(this.busRouteData, this.direction);
   List<CurrentDetail> currentDetail;
   DatabaseHelper databaseHelper = DatabaseHelper();
   UiHelper uiHelper = UiHelper();
-  PreferencesHelper prefsHelper = PreferencesHelper();
   double scrWidth, scrHeight, fontSize, stdPadding;
   AlwaysStoppedAnimation<Color> progressColor;
   Future<List<CurrentDetail>> currentRouteFuture;
@@ -35,7 +35,6 @@ class _RouteDetailState extends State<RouteDetail> {
       BusRouteData busRouteData, String currentDirection) async {
     List<CurrentDetail> list = await databaseHelper.getCurrentRouteStop(
         '${busRouteData.route}', currentDirection);
-//    print('getCurrentRoute: $currentDirection - ${list.length}');
 
     if (list.length == 0) {
       String d = currentDirection == 'I' ? 'O' : 'I';
@@ -47,41 +46,30 @@ class _RouteDetailState extends State<RouteDetail> {
     }
 
     setState(() {
-//      print('setState: ${list.length}');
-//      des = getDest(currentDirection);
       currentDetail = list;
     });
 
-//    print('after $currentDirection');
     return list;
   }
 
   String getDest(String d) {
     String s = d == 'I'
-        ? langPrefs == 'Sc'
+        ? _langValue == 'Sc'
             ? busRouteData.origSc
-            : langPrefs == 'En' ? busRouteData.origEn : busRouteData.origTc
-        : langPrefs == 'Sc'
+            : _langValue == 'En' ? busRouteData.origEn : busRouteData.origTc
+        : _langValue == 'Sc'
             ? busRouteData.destSc
-            : langPrefs == 'En' ? busRouteData.destEn : busRouteData.destTc;
-    String to = langPrefs == 'Sc' ? ' 往 ' : langPrefs == 'En' ? ' To ' : ' 往 ';
-//    print('getDest: $to $s($d) ${busRouteData.origSc} ');
+            : _langValue == 'En' ? busRouteData.destEn : busRouteData.destTc;
+    String to =
+        _langValue == 'Sc' ? ' 往 ' : _langValue == 'En' ? ' To ' : ' 往 ';
 
     return to + s;
-  }
-
-  void getLangPrefs() async {
-    String p = await prefsHelper.getLangPrefs();
-    setState(() {
-      langPrefs = p;
-    });
   }
 
   @override
   void initState() {
     initDir = this.direction;
     currentRouteFuture = getCurrentRoute(this.busRouteData, this.direction);
-    getLangPrefs();
     super.initState();
   }
 
@@ -94,6 +82,8 @@ class _RouteDetailState extends State<RouteDetail> {
     progressColor = uiHelper.progressColor;
 
     dest = getDest(direction);
+    final settings = Provider.of<PreferencesHelper>(context);
+    _langValue = settings.getLangPrefs;
 
     return SafeArea(
       child: Scaffold(
@@ -108,11 +98,7 @@ class _RouteDetailState extends State<RouteDetail> {
               iconSize: fontSize * 1.6,
               onPressed: () {
                 direction = direction == 'I' ? 'O' : 'I';
-//                if (dir == 'I') {
-//                  dir = 'O';
-//                } else {
-//                  dir = 'I';
-//                }
+
                 setState(() {
                   des = getDest(direction);
                   currentRouteFuture = getCurrentRoute(busRouteData, direction);
@@ -122,7 +108,6 @@ class _RouteDetailState extends State<RouteDetail> {
           ],
         ),
         body: bodyWidget(),
-        //currentDetail.map(CurrentDetail) => DetailRouteCard(currentDetail[position]);
       ),
     );
   }
@@ -135,17 +120,12 @@ class _RouteDetailState extends State<RouteDetail> {
         future: currentRouteFuture,
         builder: (BuildContext context,
             AsyncSnapshot<List<CurrentDetail>> snapshot) {
-//          print('11 - ${snapshot.data.length}');
-
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData)
-//          if (snapshot.connectionState == ConnectionState.done)
             return ListView.builder(
-//              scrollDirection: Axis.horizontal,
               itemCount: snapshot.data.length,
               itemBuilder: (context, position) {
                 return DetailRouteCard(snapshot.data[position], initDir);
-//                  Text('${currentDetail.nameTc}');
               },
             );
 
@@ -163,19 +143,7 @@ class _RouteDetailState extends State<RouteDetail> {
     );
   }
 
-//  Future<List<CurrentDetail>> _onReverse() {
-//    print('_onReverse');
-//    direction = direction == 'I' ? 'O' : 'I';
-//    Future<List<CurrentDetail>> list = getCurrentRoute(busRouteData, direction);
-//    setState(() {
-//      des = getDest(direction);
-//      currentRouteFuture = list;
-//    });
-//    return list;
-//  }
-
   Future<List<CurrentDetail>> _onRefresh() {
-//    print('_onRefresh');
     Future<List<CurrentDetail>> list =
         getCurrentRoute(this.busRouteData, direction);
     setState(() {

@@ -7,6 +7,7 @@ import 'package:open_eta/models/stop_detail.dart';
 import 'package:open_eta/screens/stop_detail.dart';
 import 'package:open_eta/helpers/database_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class BusStopList extends StatefulWidget {
@@ -22,7 +23,6 @@ class _BusStopListState extends State<BusStopList> {
 //  _BusStopListState();
   DatabaseHelper databaseHelper = DatabaseHelper();
   UiHelper uiHelper = UiHelper();
-  PreferencesHelper prefsHelper = PreferencesHelper();
   String _langValue = 'Tc';
   CurrentDetail currentDetail;
 
@@ -33,13 +33,6 @@ class _BusStopListState extends State<BusStopList> {
   BusStopDetailsData stopData;
   ETA futureEta;
   AlwaysStoppedAnimation<Color> progressColor;
-
-  void getLangPrefs() async {
-    String l = await prefsHelper.getLangPrefs() ?? 'Tc';
-    setState(() {
-      _langValue = l;
-    });
-  }
 
   void initialList() {
     final Future<Database> dbFuture = databaseHelper.initializeDatabase();
@@ -58,7 +51,6 @@ class _BusStopListState extends State<BusStopList> {
   @override
   void initState() {
     initialList();
-    getLangPrefs();
     super.initState();
   }
 
@@ -68,6 +60,8 @@ class _BusStopListState extends State<BusStopList> {
     scrHeight = uiHelper.scrHeight(context);
     fontSize = scrWidth / 100 * 5;
     progressColor = uiHelper.progressColor;
+    final settings = Provider.of<PreferencesHelper>(context);
+    _langValue = settings.getLangPrefs;
 
     return Scaffold(
       appBar: AppBar(

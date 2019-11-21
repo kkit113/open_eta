@@ -5,6 +5,7 @@ import 'package:open_eta/models/current_detail.dart';
 import 'package:open_eta/models/route_stop.dart';
 import 'package:open_eta/screens/detail_stop_card.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class StopDetail extends StatefulWidget {
 //  final RouteStopData routeStopData;
@@ -29,15 +30,7 @@ class _StopDetailState extends State<StopDetail> {
   Future<List<CurrentDetail>> currentStopFuture;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
-  PreferencesHelper prefsHelper = PreferencesHelper();
   String _langValue = 'Tc';
-
-  void getLangPrefs() async {
-    String l = await prefsHelper.getLangPrefs() ?? 'Tc';
-    setState(() {
-      _langValue = l;
-    });
-  }
 
   Future<List<CurrentDetail>> getCurrentStop(String stop) async {
     currentDetailList = await databaseHelper.getCurrentStopBus(stop);
@@ -49,7 +42,6 @@ class _StopDetailState extends State<StopDetail> {
     setState(() {
       currentStopFuture = getCurrentStop('${currentDetail.stop}');
     });
-    getLangPrefs();
     super.initState();
   }
 
@@ -60,6 +52,8 @@ class _StopDetailState extends State<StopDetail> {
     fontSize = uiHelper.stdFont(context);
     stdPadding = uiHelper.stdPadding(context);
     progressColor = uiHelper.progressColor;
+    final settings = Provider.of<PreferencesHelper>(context);
+    _langValue = settings.getLangPrefs;
 
     if (currentStopFuture == null) {
 //      print('StopDetail: ${currentStopFuture.toString()}');

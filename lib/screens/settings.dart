@@ -2,10 +2,10 @@ import 'package:open_eta/helpers/busdata_helper.dart';
 import 'package:open_eta/helpers/default_helper.dart';
 import 'package:open_eta/helpers/preference_helper.dart';
 import 'package:open_eta/helpers/ui_helper.dart';
-import 'package:open_eta/screens/custom_dialog.dart';
 import 'package:open_eta/screens/disclaimer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:provider/provider.dart';
 
 class Settings extends StatefulWidget {
   @override
@@ -17,7 +17,6 @@ class _SettingsState extends State<Settings> {
   DefaultData defaultData = DefaultData();
   BusDataHelper busDataHelper = BusDataHelper();
   Disclaimer disclaimer = Disclaimer();
-  PreferencesHelper prefsHelper = PreferencesHelper();
 //  CustomDialog customDialog = CustomDialog();
   int routes, routeStops, stops, stopsFuture;
   double stdPadding, scrWidth, scrHeight, fontSize;
@@ -25,7 +24,6 @@ class _SettingsState extends State<Settings> {
 
   @override
   void initState() {
-    getLangPrefs();
     // TODO: implement initState
     super.initState();
   }
@@ -36,44 +34,26 @@ class _SettingsState extends State<Settings> {
   Future<int> etaCountFuture() async => busDataHelper.preferEtaCount();
   Future<int> preferStopCountFuture() async => busDataHelper.preferStopCount();
 
-  void getLangPrefs() async {
-    String l = await prefsHelper.getLangPrefs() ?? 'Tc';
-    setState(() {
-      _langValue = l;
-    });
-  }
-
-  void setLangValue(String v) async {
-    bool s = await prefsHelper.setLangPrefs(v);
-    if (s) {
-      setState(() {
-        _langValue = v;
-      });
-    }
-  }
-
   void rCount() async {
-    int c = await defaultData.insertDefaultBusRoute();
+    await defaultData.insertDefaultBusRoute();
     setState(() {
       rCountFuture();
     });
   }
 
   void sCount() async {
-    int c = await defaultData.insertDefaultBusStop();
+    await defaultData.insertDefaultBusStop();
     setState(() {
       sCountFuture();
     });
   }
 
   void rStopCount() async {
-    int c = await defaultData.insertDefaultRouteStop();
+    await defaultData.insertDefaultRouteStop();
     setState(() {
       rStopCountFuture();
     });
   }
-
-  _downloadData() {}
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +61,10 @@ class _SettingsState extends State<Settings> {
     scrHeight = uiHelper.scrHeight(context);
     fontSize = scrWidth * 0.05;
     stdPadding = scrWidth * 0.01;
-//    getLanguagePreference();
+    final settings = Provider.of<PreferencesHelper>(context);
+    _langValue = settings.getLangPrefs;
+
+    //    getLanguagePreference();
 
     return SafeArea(
       child: Scaffold(
@@ -241,9 +224,9 @@ class _SettingsState extends State<Settings> {
                     children: <Widget>[
                       Radio(
                           value: 'En',
-                          groupValue: _langValue,
+                          groupValue: settings.getLangPrefs,
                           onChanged: (T) {
-                            setLangValue(T);
+                            settings.setLangPrefs(T);
                           }),
                       Text(
                         'Eng',
@@ -251,9 +234,9 @@ class _SettingsState extends State<Settings> {
                       ),
                       Radio(
                           value: 'Tc',
-                          groupValue: _langValue,
+                          groupValue: settings.getLangPrefs,
                           onChanged: (T) {
-                            setLangValue(T);
+                            settings.setLangPrefs(T);
                           }),
                       Text(
                         '繁',
@@ -261,9 +244,9 @@ class _SettingsState extends State<Settings> {
                       ),
                       Radio(
                           value: 'Sc',
-                          groupValue: _langValue,
+                          groupValue: settings.getLangPrefs,
                           onChanged: (T) {
-                            setLangValue(T);
+                            settings.setLangPrefs(T);
                           }),
                       Text(
                         '简',
